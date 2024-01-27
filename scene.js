@@ -13,7 +13,7 @@ export const camera = new THREE.PerspectiveCamera(
   1000
 );
 export const listener = new THREE.AudioListener();
-export const dirLight = new THREE.DirectionalLight(0xffffff, 0.1);
+export const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 
 const controllerModelFactory = new XRControllerModelFactory();
 
