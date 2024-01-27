@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Slices</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script
+      async
+      src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"
+    ></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@latest/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@latest/examples/jsm/",
+          "rapier": "https://cdn.skypack.dev/@dimforge/rapier3d-compat"
+        }
+      }
+    </script>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
