@@ -78,7 +78,8 @@ export function update(dt) {
     // Apply controller rotation to ray direction (-1 z forward)
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersects = raycaster.intersectObjects([ground]);
+    // TODO(Apaar): Once there's a ground model, we have to add it in here.
+    const intersects = raycaster.intersectObjects([]);
 
     if (intersects.length > 0) {
       teleportIntersection = intersects[0].point;
