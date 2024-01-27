@@ -3,6 +3,7 @@ import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFa
 
 import { renderer } from "./renderer.js";
 import { DEBUG_MODE as PHYSICS_DEBUG_MODE, forEachBody } from "./physics.js";
+import { onAllLoaded, roomGltf } from "./assets.js";
 
 export const scene = new THREE.Scene();
 export const camera = new THREE.PerspectiveCamera(
@@ -15,6 +16,8 @@ export const listener = new THREE.AudioListener();
 export const dirLight = new THREE.DirectionalLight(0xffffff, 0.1);
 
 const controllerModelFactory = new XRControllerModelFactory();
+
+export let room = null;
 
 export function init() {
   function onWindowResize() {
@@ -54,6 +57,11 @@ export function init() {
   );
 
   scene.add(controllerGrip2);
+
+  onAllLoaded(function () {
+    room = roomGltf.scene;
+    scene.add(room);
+  });
 }
 
 export function update(elapsed) {

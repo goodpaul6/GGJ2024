@@ -7,10 +7,16 @@ const audioLoader = new THREE.AudioLoader();
 // Array of functions that are called once all the models are loaded.
 const allLoadedHandlers = [];
 
-export function init() {}
+export let roomGltf = null;
+
+export function init() {
+  gltfLoader.load("assets/room.glb", function (gltf) {
+    roomGltf = gltf;
+  });
+}
 
 export function allLoaded() {
-  return true;
+  return roomGltf;
 }
 
 // Function will be called if/once all models are loaded.
