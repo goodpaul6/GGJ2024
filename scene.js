@@ -10,7 +10,7 @@ export const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
   0.1,
-  1000
+  100
 );
 export const listener = new THREE.AudioListener();
 export const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -29,18 +29,8 @@ export function init() {
 
   camera.add(listener);
 
-  dirLight.position.set(10, 13, 10);
-  dirLight.castShadow = true;
-  dirLight.shadow.mapSize.width = 512;
-  dirLight.shadow.mapSize.height = 512;
-  dirLight.shadow.camera.near = 0.5;
-  dirLight.shadow.camera.far = 500;
-  dirLight.shadow.camera.left = -20;
-  dirLight.shadow.camera.right = 20;
-  dirLight.shadow.camera.top = 20;
-  dirLight.shadow.camera.bottom = -20;
-
-  scene.add(dirLight);
+  const ambLight = new THREE.AmbientLight(0x606060);
+  scene.add(ambLight);
 
   const controllerGrip1 = renderer.xr.getControllerGrip(0);
   controllerGrip1.add(
@@ -55,8 +45,6 @@ export function init() {
   );
 
   scene.add(controllerGrip2);
-
-  onAllLoaded(function () {});
 }
 
 export function update(elapsed) {

@@ -9,18 +9,24 @@ const allLoadedHandlers = [];
 
 export let roomGltf = null;
 export let doorGltf = null;
+export let birthdayGltf = null;
 
 export function init() {
   gltfLoader.load("assets/room.glb", function (gltf) {
     roomGltf = gltf;
   });
+
   gltfLoader.load("assets/door.glb", function (gltf) {
     doorGltf = gltf;
+  });
+
+  gltfLoader.load("assets/birthday.glb", function (gltf) {
+    birthdayGltf = gltf;
   });
 }
 
 export function allLoaded() {
-  return roomGltf, doorGltf;
+  return roomGltf && doorGltf && birthdayGltf;
 }
 
 // Function will be called if/once all models are loaded.

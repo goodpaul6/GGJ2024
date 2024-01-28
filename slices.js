@@ -1,5 +1,6 @@
 import { scene } from "./scene.js";
 import sisterSliceMaker from "./sisterSlice.js";
+import birthdaySliceMaker from "./birthdaySlice.js";
 
 const sliceMakers = [];
 
@@ -7,7 +8,7 @@ let currentSliceIndex = 0;
 export let currentSlice = null;
 
 export function init() {
-  sliceMakers.push(sisterSliceMaker);
+  sliceMakers.push(birthdaySliceMaker);
 }
 
 export function update(dt) {

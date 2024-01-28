@@ -34,6 +34,13 @@ export function worldPos() {
   return new THREE.Vector3(-pos.x, -pos.y, -pos.z);
 }
 
+export function setWorldPos(x, y, z) {
+  // Shit's backwards
+  pos.x = -x;
+  pos.y = -y;
+  pos.z = -z;
+}
+
 export function init() {
   scene.add(teleportMarker);
 
