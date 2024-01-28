@@ -78,4 +78,4 @@ function animate(ts) {
 }
 
 renderer.setAnimationLoop(animate);
-setInterval(updatePhysics, 1000 / 120);
+setInterval(updatePhysics, 1000 / 60);

@@ -145,6 +145,60 @@ export function resetDynamicBodyToPos(body, pos) {
   body.setAngvel(new THREE.Vector3(), false);
 }
 
+export function numColliders(body) {
+  return body.numColliders();
+}
+
+export function setBodySensor({ body, colliderIndex = 0, name, isSensor }) {
+  if (colliderIndex < 0 || colliderIndex >= body.numColliders()) {
+    throw new Error(
+      "Invalid collider index. Make sure to attach a collider and make sure the index you provide is valid."
+    );
+  }
+
+  const collider = body.collider(colliderIndex);
+
+  const wasSensor = collider.isSensor();
+  if (wasSensor === isSensor) {
+    return;
+  }
+
+  collider.setSensor(isSensor);
+
+  if (!wasSensor && isSensor) {
+    const sensors = body.userData?.sensors ?? [];
+    sensors.push({
+      collider,
+      name,
+    });
+
+    body.userData = {
+      ...body.userData,
+      sensors,
+      sensorEvents: body.userData?.sensorEvents ?? [],
+      intersections: [],
+    };
+  } else if (wasSensor && !isSensor) {
+    body.userData.sensors.remove(
+      body.userData.sensors.find((s) => s.name === name)
+    );
+  }
+}
+
+function createSensorEvent({
+  sensorName,
+  isEnterEvent = false,
+  isExitEvent = false,
+  otherBody,
+}) {
+  return {
+    sensorName,
+    isEnterEvent,
+    isExitEvent,
+    otherBody,
+  };
+}
+
 export function setBodyType(body, type) {
   switch (type) {
     case BODY_TYPE_DYNAMIC:
@@ -174,9 +228,74 @@ export function forEachBody(fn) {
   bodies.forEach(fn);
 }
 
+export function drainSensorEvents(body) {
+  if (!body.userData?.sensors?.length) {
+    throw new Error(
+      "This body isn't even a sensor dawg. Use setBodySensor to set it up as one."
+    );
+  }
+
+  const events = body.userData.sensorEvents.slice();
+  body.userData.sensorEvents.length = 0;
+
+  return events;
+}
+
 export function update() {
   if (!world) {
     return;
+  }
+
+  for (const body of bodies) {
+    const sensors = body.userData?.sensors;
+
+    if (!sensors?.length) {
+      continue;
+    }
+
+    // We have an abstraction over Rapier's low-level intersection system to
+    // surface events for bodies that enter and exit collision.
+    //
+    // Since the physics step is different from the XR step, we let the user
+    // handle the events whenever they want, and queue them up here.
+    for (const { collider, name: sensorName } of sensors) {
+      const prevIntersections = body.userData.intersections.slice();
+      body.userData.intersections.length = 0;
+
+      world.intersectionsWith(collider, (otherCollider) => {
+        const otherBody = collider.parent();
+
+        body.userData.intersections.push(otherBody);
+
+        if (prevIntersections.includes(otherBody)) {
+          return;
+        }
+
+        // We just started colliding with this, so queue up an enter event
+        body.userData.sensorEvents.push(
+          createSensorEvent({
+            isEnterEvent: true,
+            otherBody,
+            sensorName,
+          })
+        );
+      });
+
+      for (const prevIntersection of prevIntersections) {
+        if (body.userData.intersections.includes(prevIntersection)) {
+          continue;
+        }
+
+        // This other body stopped intersecting with us
+        body.userData.sensorEvents.push(
+          createSensorEvent({
+            isExitEvent: true,
+            otherBody: prevIntersection,
+            sensorName,
+          })
+        );
+      }
+    }
   }
 
   if (DEBUG_MODE) {

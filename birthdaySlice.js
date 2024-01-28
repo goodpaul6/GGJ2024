@@ -13,6 +13,8 @@ import {
   BODY_TYPE_POSN_KINEMATIC,
   BODY_TYPE_DYNAMIC,
   resetDynamicBodyToPos,
+  setBodySensor,
+  drainSensorEvents,
 } from "./physics.js";
 
 const tempVec = new THREE.Vector3();
@@ -49,7 +51,7 @@ function setup() {
 
   this.paddle.userData.initPos = this.paddle.position.clone();
 
-  addToGrabbables(this.paddle);
+  addToGrabbables(this.paddle, 0.3);
 
   this.table = this.room.getObjectByName("Table");
 
@@ -59,11 +61,40 @@ function setup() {
     radius: 1.55,
   });
 
+  this.cake = this.room.getObjectByName("Cake");
+
+  this.cake.userData.body = createCylinderBody({
+    halfHeight: 0.13,
+    position: this.cake.position,
+    radius: 0.21,
+  });
+
+  tempVec.copy(this.cake.position);
+  tempVec.setY(tempVec.y + 0.25);
+
+  this.blowSensorBody = createCylinderBody({
+    halfHeight: 0.1,
+    position: tempVec.clone(),
+    radius: 0.21,
+  });
+
+  setBodySensor({
+    body: this.blowSensorBody,
+    isSensor: true,
+    name: "Blow",
+  });
+
   this.scene.add(birthdayGltf.scene);
 }
 
 function update(dt) {
   this.candleLight.intensity = Math.random() * 0.2 + 1;
+
+  const blowSensorEvents = drainSensorEvents(this.blowSensorBody);
+
+  if (blowSensorEvents.length > 0) {
+    console.log(blowSensorEvents);
+  }
 
   if (this.paddle.userData.isGrabbed) {
     const body = this.paddle.userData.body;
@@ -79,7 +110,7 @@ function update(dt) {
   } else {
     setBodyType(this.paddle.userData.body, BODY_TYPE_DYNAMIC);
 
-    if (this.paddle.position.distanceTo(camera.position) > 2.25) {
+    if (this.paddle.position.distanceTo(camera.position) > 2) {
       resetDynamicBodyToPos(
         this.paddle.userData.body,
         this.paddle.userData.initPos

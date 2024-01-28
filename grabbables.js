@@ -3,8 +3,9 @@ import { gamepads } from "./input.js";
 
 const grabbables = [];
 
-export function addToGrabbables(grabbable) {
+export function addToGrabbables(grabbable, grabDist = 0.2) {
   grabbable.userData.isGrabbed = false;
+  grabbable.userData.grabDist = grabDist;
 
   grabbables.push(grabbable);
 }
@@ -43,7 +44,7 @@ export function update() {
         !gamepad.hasGrabbedObject &&
         !grabbable.userData.heldByGamepad &&
         gamepad.buttons[1].value >= pressedValue &&
-        worldPos.distanceTo(tempVector) < 0.2
+        worldPos.distanceTo(tempVector) < grabbable.userData.grabDist
       ) {
         gamepad.hasGrabbedObject = true;
 
