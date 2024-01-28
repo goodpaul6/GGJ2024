@@ -25,6 +25,7 @@ import {
 } from "./assets.js";
 import { init as initPhysics, update as updatePhysics } from "./physics.js";
 import { init as initSlices, update as updateSlices } from "./slices.js";
+import { update as updateGrabbables } from "./grabbables.js";
 
 initPhysics();
 initRenderer();
@@ -70,6 +71,7 @@ function animate(ts) {
   updateScene(ts);
   updateSlices(dt);
   updateInput();
+  updateGrabbables();
   updatePlayer(dt);
 
   renderer.render(scene, camera);

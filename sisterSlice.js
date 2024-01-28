@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import createSlice from "./sliceCreator.js";
 import { roomGltf, doorGltf } from "./assets.js";
+import { addToGrabbables } from "./grabbables.js";
 
 function setup() {
   const geom = new THREE.BoxGeometry(1, 1, 1);
@@ -17,6 +18,13 @@ function setup() {
   this.door = doorGltf.scene;
   this.door.position.set(-5.02, 0.02, 0.72);
 
+  this.door.closed = true;
+  this.door.maxRotation = -1.518;
+
+  this.handle = this.door.getObjectByName("Handle");
+  this.handle.updateMatrixWorld(true);
+  addToGrabbables(this.handle);
+
   const bbox = new THREE.Box3().setFromObject(this.door);
   const size = new THREE.Vector3();
   bbox.getSize(size);
@@ -32,7 +40,13 @@ function setup() {
 
 function update(dt) {
   this.cube.rotateY(dt);
-  this.door.rotateY(dt);
+  if (!this.door.closed && this.door.rotation.y > this.door.maxRotation) {
+    this.door.rotateY(-dt);
+  }
+
+  if (this.handle.isGrabbed) {
+    this.door.closed = false;
+  }
 }
 
 export default function () {
