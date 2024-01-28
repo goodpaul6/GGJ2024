@@ -2,16 +2,11 @@ import * as THREE from "three";
 import createSlice from "./sliceCreator.js";
 import { roomGltf, doorGltf } from "./assets.js";
 import { addToGrabbables } from "./grabbables.js";
+import { setWorldPos } from "./player.js";
 
 function setup() {
-  const geom = new THREE.BoxGeometry(1, 1, 1);
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-
-  this.cube = new THREE.Mesh(geom, material);
-  this.cube.position.set(0, 1, 5);
-
-  this.scene.add(this.cube);
-
+  // Set y pos to 0.5 to make yourself a lil taller
+  setWorldPos(0, 0.5, 0);
   this.room = roomGltf.scene;
   this.room.position.set(0, 0.02, 0);
 
@@ -39,7 +34,6 @@ function setup() {
 }
 
 function update(dt) {
-  this.cube.rotateY(dt);
   if (!this.door.closed && this.door.rotation.y > this.door.maxRotation) {
     this.door.rotateY(-dt);
   }

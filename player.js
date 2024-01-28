@@ -56,11 +56,9 @@ export function init() {
         return;
       }
 
-      pos.set(
-        -teleportIntersection.x,
-        -teleportIntersection.y,
-        -teleportIntersection.z
-      );
+      // Keep the old y coord since we don't teleport along the y axis
+      // Allows us to manually set the height of the player
+      pos.set(-teleportIntersection.x, pos.y, -teleportIntersection.z);
     }
 
     controller.addEventListener("selectend", onSelectEnd);
