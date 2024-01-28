@@ -13,6 +13,8 @@ import {
   BODY_TYPE_DYNAMIC,
 } from "./physics.js";
 
+const tempVec = new THREE.Vector3();
+
 function setup() {
   this.room = birthdayGltf.scene;
 
@@ -62,14 +64,16 @@ function update(dt) {
   updateObjectFromBody(this.paddle, this.paddle.userData.body);
 
   if (this.paddle.userData.isGrabbed) {
-    setBodyType(this.paddle.userData.body, BODY_TYPE_POSN_KINEMATIC);
+    const body = this.paddle.userData.body;
+    setBodyType(body, BODY_TYPE_POSN_KINEMATIC);
 
-    this.paddle.userData.body.setNextKinematicTranslation(
-      this.paddle.userData.grabHandPos
-    );
-    this.paddle.userData.body.setNextKinematicRotation(
-      this.paddle.userData.grabHandOrient
-    );
+    // Offset the hand position by a bit (along the orientation axes, not global world axes)
+    tempVec.set(0, 0, -0.15);
+    tempVec.applyQuaternion(this.paddle.userData.grabHandOrient);
+    tempVec.add(this.paddle.userData.grabHandPos);
+
+    body.setNextKinematicTranslation(tempVec);
+    body.setNextKinematicRotation(this.paddle.userData.grabHandOrient);
   } else {
     setBodyType(this.paddle.userData.body, BODY_TYPE_DYNAMIC);
   }
