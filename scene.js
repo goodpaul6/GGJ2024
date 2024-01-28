@@ -17,9 +17,6 @@ export const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 
 const controllerModelFactory = new XRControllerModelFactory();
 
-export let room = null;
-export let lightbulb = null;
-
 export function init() {
   function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -59,14 +56,7 @@ export function init() {
 
   scene.add(controllerGrip2);
 
-  onAllLoaded(function () {
-    room = roomGltf.scene;
-    room.position.set(0, 0.02, 0);
-
-    lightbulb = room.getObjectByName("RoomLightbulb");
-    lightbulb.intensity = 500;
-    scene.add(room);
-  });
+  onAllLoaded(function () {});
 }
 
 export function update(elapsed) {
