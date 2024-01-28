@@ -1,9 +1,11 @@
 import * as THREE from "three";
 import { gamepads } from "./input.js";
-let grabbables = [];
 
-export function addToGrabbables(grabbable, isGrabbed = false) {
-  grabbable.isGrabbed = isGrabbed;
+const grabbables = [];
+
+export function addToGrabbables(grabbable) {
+  grabbable.userData.isGrabbed = false;
+
   grabbables.push(grabbable);
 }
 
@@ -27,7 +29,8 @@ export function update() {
       const worldPos = grabbable.getWorldPosition(new THREE.Vector3());
 
       if (worldPos.distanceTo(tempVector) < 0.2) {
-        grabbable.isGrabbed = true;
+        grabbable.userData.isGrabbed = true;
+        grabbable.userData.grabHandPos = tempVector.clone();
       }
     }
   }

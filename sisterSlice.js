@@ -44,7 +44,7 @@ function update(dt) {
     this.door.rotateY(-dt);
   }
 
-  if (this.handle.isGrabbed) {
+  if (this.handle.userData.isGrabbed) {
     this.door.closed = false;
   }
 }
