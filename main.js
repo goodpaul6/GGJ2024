@@ -24,6 +24,7 @@ import {
   allLoaded,
 } from "./assets.js";
 import { init as initPhysics, update as updatePhysics } from "./physics.js";
+import { init as initSlices, update as updateSlices } from "./slices.js";
 
 initPhysics();
 initRenderer();
@@ -31,6 +32,10 @@ initScene();
 initInput();
 initPlayer();
 initAssets();
+
+onAllLoaded(() => {
+  initSlices();
+});
 
 let lastTS = 0;
 
@@ -63,6 +68,7 @@ function animate(ts) {
   }
 
   updateScene(ts);
+  updateSlices(dt);
   updateInput();
   updatePlayer(dt);
 
