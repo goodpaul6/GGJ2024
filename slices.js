@@ -4,7 +4,7 @@ import sisterSliceMaker from "./sisterSlice.js";
 const sliceMakers = [];
 
 let currentSliceIndex = 0;
-let currentSlice = null;
+export let currentSlice = null;
 
 export function init() {
   sliceMakers.push(sisterSliceMaker);

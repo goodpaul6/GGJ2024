@@ -16,6 +16,8 @@ function setup() {
 
   const lightbulb = this.room.getObjectByName("RoomLightbulb");
   lightbulb.intensity = 500;
+
+  this.ground = this.room.getObjectByName("Ground");
   this.scene.add(this.room);
 }
 

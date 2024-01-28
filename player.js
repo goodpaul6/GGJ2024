@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { baseReferenceSpace } from "./renderer.js";
 import { scene } from "./scene.js";
 import { controllers, gamepads } from "./input.js";
+import { currentSlice } from "./slices.js";
 
 let pos = new THREE.Vector3();
 export let orient = new THREE.Quaternion();
@@ -78,8 +79,11 @@ export function update(dt) {
     // Apply controller rotation to ray direction (-1 z forward)
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    // TODO(Apaar): Once there's a ground model, we have to add it in here.
-    const intersects = raycaster.intersectObjects([]);
+    const intersectObjects = [];
+    if (currentSlice?.ground) {
+      intersectObjects.push(currentSlice.ground);
+    }
+    const intersects = raycaster.intersectObjects(intersectObjects);
 
     if (intersects.length > 0) {
       teleportIntersection = intersects[0].point;
