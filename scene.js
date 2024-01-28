@@ -22,6 +22,8 @@ export function init() {
     camera.updateProjectionMatrix();
   }
 
+  scene.add(camera);
+
   window.addEventListener("resize", onWindowResize);
 
   scene.background = new THREE.Color(0x79c6d4);

@@ -26,6 +26,7 @@ import {
 import { init as initPhysics, update as updatePhysics } from "./physics.js";
 import { init as initSlices, update as updateSlices } from "./slices.js";
 import { update as updateGrabbables } from "./grabbables.js";
+import { initText, update as updateText } from "./text.js";
 
 initPhysics();
 initRenderer();
@@ -33,6 +34,7 @@ initScene();
 initInput();
 initPlayer();
 initAssets();
+initText();
 
 onAllLoaded(() => {
   initSlices();
@@ -73,6 +75,7 @@ function animate(ts) {
   updateInput();
   updateGrabbables();
   updatePlayer(dt);
+  updateText(dt);
 
   renderer.render(scene, camera);
 }
