@@ -34,24 +34,34 @@ function meshFromText(text) {
   mesh = new THREE.Mesh(planeGeometry, material);
   mesh.position.set(0, -0.5, -2); // set position where you want it
   mesh.name = "Text";
-}
 
-export function initText() {
-  meshFromText("Welcome to a series of slices!");
-  camera.add(mesh);
+  mesh.material.depthTest = false;
+  mesh.material.depthWrite = false;
+  mesh.onBeforeRender = function (renderer) {
+    renderer.clearDepth();
+  };
 }
 
 export function hideText() {
-  mesh.visible = false;
+  camera.remove(mesh);
+  // We can use a visible property on the mesh to hide it instead,
+  // but we are always displaying different text when we make it
+  // visible again, so we just remove it from the camera instead
+  // mesh.visible = false;
 }
 
-export function showText(text = null) {
-  if (text !== null) {
-    camera.remove(mesh);
-    meshFromText(text);
-    camera.add(mesh);
+export function showText(text, timer = null) {
+  meshFromText(text);
+
+  mesh.userData.timer = timer;
+  camera.add(mesh);
+}
+
+export function update(dt) {
+  if (mesh?.userData.timer) {
+    mesh.userData.timer -= dt;
+    if (mesh.userData.timer < 0) {
+      hideText();
+    }
   }
-  mesh.visible = true;
 }
-
-export function update(dt) {}

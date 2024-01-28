@@ -3,6 +3,7 @@ import createSlice from "./sliceCreator.js";
 import { roomGltf, doorGltf, sisterGltf } from "./assets.js";
 import { addToGrabbables } from "./grabbables.js";
 import { setWorldPos } from "./player.js";
+import { showText } from "./text.js";
 
 function setup() {
   // Set y pos to 0.5 to make yourself a lil taller
@@ -17,7 +18,8 @@ function setup() {
   this.door = doorGltf.scene;
   this.door.position.set(-5.02, 0.02, 0.72);
 
-  this.door.closed = true;
+  this.door.userData.closed = true;
+  this.door.userData.fullyOpened = false;
   this.door.maxRotation = -1.518;
 
   this.handle = this.door.getObjectByName("Handle");
@@ -37,15 +39,43 @@ function setup() {
   this.scene.add(this.room);
   this.scene.add(this.door);
   this.scene.add(this.sister);
+
+  showText("Save your sister from the closet!", 5);
 }
 
 function update(dt) {
-  if (!this.door.closed && this.door.rotation.y > this.door.maxRotation) {
-    this.door.rotateY(-dt);
+  if (this.timerBeforeNextFun) {
+    this.timerBeforeNextFun -= dt;
+    if (this.timerBeforeNextFun < 0) {
+      this.nextFun();
+    }
   }
 
+  // Door logic
+  if (
+    !this.door.userData.closed &&
+    this.door.rotation.y > this.door.maxRotation
+  ) {
+    this.door.rotateY(-dt);
+  }
+  if (
+    !this.door.userData.isFullyOpened &&
+    this.door.rotation.y > this.door.maxRotation
+  ) {
+    this.door.userData.isFullyOpened;
+    this.timerBeforeNextFun = 5;
+    this.nextFun = () => {
+      showText('Sister: "You\'re adopted!"', 3);
+      this.timerBeforeNextFun = 3;
+      this.nextFun = () => {
+        this.isDone = true;
+        this.timerBeforeNextFun = null;
+        this.nextFun = null;
+      };
+    };
+  }
   if (this.handle.userData.isGrabbed) {
-    this.door.closed = false;
+    this.door.userData.closed = false;
   }
 }
 

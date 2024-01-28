@@ -1,6 +1,7 @@
 import { scene } from "./scene.js";
 import sisterSliceMaker from "./sisterSlice.js";
 import birthdaySliceMaker from "./birthdaySlice.js";
+import welcomeSliceMaker from "./welcomeSlice.js";
 
 const sliceMakers = [];
 
@@ -8,6 +9,8 @@ let currentSliceIndex = 0;
 export let currentSlice = null;
 
 export function init() {
+  sliceMakers.push(welcomeSliceMaker);
+  sliceMakers.push(sisterSliceMaker);
   sliceMakers.push(birthdaySliceMaker);
 }
 
@@ -40,6 +43,8 @@ export function update(dt) {
 
     // Go to the next slice
     currentSliceIndex += 1;
-    currentSliceIndex %= slices.length;
+    currentSliceIndex %= sliceMakers.length;
+
+    currentSlice = null;
   }
 }

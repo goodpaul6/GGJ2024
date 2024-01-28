@@ -29,3 +29,7 @@ export function init() {
   document.body.appendChild(renderer.domElement);
   document.body.appendChild(VRButton.createButton(renderer));
 }
+
+export function isInVr() {
+  return renderer.xr.isPresenting;
+}
