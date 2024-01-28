@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import createSlice from "./sliceCreator.js";
-import { roomGltf, doorGltf } from "./assets.js";
+import { roomGltf, doorGltf, sisterGltf } from "./assets.js";
 import { addToGrabbables } from "./grabbables.js";
 import { setWorldPos } from "./player.js";
 
@@ -9,6 +9,10 @@ function setup() {
   setWorldPos(0, 0.5, 0);
   this.room = roomGltf.scene;
   this.room.position.set(0, 0.02, 0);
+
+  this.sister = sisterGltf.scene;
+  this.sister.position.set(-5.79, 0.02, 0);
+  this.sister.rotation.set(0, -1, 0);
 
   this.door = doorGltf.scene;
   this.door.position.set(-5.02, 0.02, 0.72);
@@ -29,8 +33,10 @@ function setup() {
   lightbulb.intensity = 500;
 
   this.ground = this.room.getObjectByName("Ground");
+
   this.scene.add(this.room);
   this.scene.add(this.door);
+  this.scene.add(this.sister);
 }
 
 function update(dt) {
