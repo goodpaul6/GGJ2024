@@ -139,13 +139,23 @@ export function updateObjectFromBody(mesh, body) {
   mesh.quaternion.copy(body.rotation());
 }
 
+export function resetDynamicBodyToPos(body, pos) {
+  body.setTranslation(pos.clone(), false);
+  body.setLinvel(new THREE.Vector3(), false);
+  body.setAngvel(new THREE.Vector3(), false);
+}
+
 export function setBodyType(body, type) {
   switch (type) {
     case BODY_TYPE_DYNAMIC:
-      body.setBodyType(RAPIER.RigidBodyType.Dynamic);
+      if (body.bodyType() !== RAPIER.RigidBodyType.Dynamic) {
+        body.setBodyType(RAPIER.RigidBodyType.Dynamic);
+      }
       break;
     case BODY_TYPE_POSN_KINEMATIC:
-      body.setBodyType(RAPIER.RigidBodyType.KinematicPositionBased);
+      if (body.bodyType() !== RAPIER.RigidBodyType.KinematicPositionBased) {
+        body.setBodyType(RAPIER.RigidBodyType.KinematicPositionBased);
+      }
       break;
   }
 }
