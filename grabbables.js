@@ -32,11 +32,12 @@ export function update() {
       if (grabbable.userData.heldByGamepad === gamepad) {
         if (gamepad.buttons[1].value < pressedValue) {
           gamepad.hasGrabbedObject = false;
+
           grabbable.userData.isGrabbed = false;
           grabbable.userData.heldByGamepad = null;
         } else {
-          grabbable.userData.isGrabbed = true;
           grabbable.userData.grabHandPos = tempVector.clone();
+          grabbable.userData.grabHandOrient = tempQuat.clone();
         }
       } else if (
         !gamepad.hasGrabbedObject &&
@@ -47,7 +48,10 @@ export function update() {
         gamepad.hasGrabbedObject = true;
 
         grabbable.userData.isGrabbed = true;
+        grabbable.userData.heldByGamepad = gamepad;
+
         grabbable.userData.grabHandPos = tempVector.clone();
+        grabbable.userData.grabHandOrient = tempQuat.clone();
       }
     }
   }

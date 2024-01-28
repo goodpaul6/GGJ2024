@@ -16,7 +16,7 @@ const ONE = new THREE.Vector3(1, 1, 1);
 export const BODY_TYPE_DYNAMIC = 0;
 export const BODY_TYPE_POSN_KINEMATIC = 1;
 
-export const DEBUG_MODE = false;
+export const DEBUG_MODE = true;
 
 export function init() {
   RAPIER.init().then(function () {
@@ -88,8 +88,14 @@ export function createCuboidBody({
   position,
   quat = null,
   mass = 0,
+  colliderOffset = null,
 }) {
   const colliderDesc = RAPIER.ColliderDesc.cuboid(hx, hy, hz);
+
+  if (colliderOffset !== null) {
+    colliderDesc.setTranslation(...colliderOffset);
+  }
+
   return createBody(position, quat, mass, colliderDesc);
 }
 

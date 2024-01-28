@@ -3,7 +3,6 @@ import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFa
 
 import { renderer } from "./renderer.js";
 import { DEBUG_MODE as PHYSICS_DEBUG_MODE, forEachBody } from "./physics.js";
-import { onAllLoaded, roomGltf } from "./assets.js";
 
 export const scene = new THREE.Scene();
 export const camera = new THREE.PerspectiveCamera(
