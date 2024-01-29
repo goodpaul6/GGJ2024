@@ -1,0 +1,6 @@
+# Created by Kenney (www.kenney.nl)
+
+newmtl birthday
+Kd 1 1 1
+map_Kd Textures/birthday.png
+

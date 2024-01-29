@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export default function ({ name, setup, update, ...props }) {
+export default function ({ name, setup, update, teardown = null, ...props }) {
   return {
     // Will hold all the objects for the slice
     scene: new THREE.Scene(),
@@ -11,5 +11,6 @@ export default function ({ name, setup, update, ...props }) {
     name,
     setup,
     update,
+    teardown,
   };
 }

@@ -13,8 +13,9 @@ import {
   BODY_TYPE_POSN_KINEMATIC,
   BODY_TYPE_DYNAMIC,
   resetDynamicBodyToPos,
-  setBodySensor,
-  drainSensorEvents,
+  createCylinderTrigger,
+  clear as clearPhysics,
+  drainTriggerEvents,
 } from "./physics.js";
 
 const tempVec = new THREE.Vector3();
@@ -22,13 +23,11 @@ const tempVec = new THREE.Vector3();
 function setup() {
   this.room = birthdayGltf.scene;
 
-  setWorldPos(0, 0.5, 2);
-
-  const lightbulb = this.room.getObjectByName("RoomLightbulb");
-  lightbulb.intensity = 2;
+  setWorldPos(0, 0.3, 1);
 
   this.candleLight = this.room.getObjectByName("CandleLight");
   this.candleLight.intensity = 1;
+  this.candleLight.castShadow = true;
 
   this.candleFires = this.room.children.filter((c) =>
     c.name.startsWith("CandleFire")
@@ -55,10 +54,14 @@ function setup() {
 
   this.table = this.room.getObjectByName("Table");
 
-  this.table.userData.body = createCylinderBody({
-    halfHeight: 0.07,
-    position: this.table.position,
-    radius: 1.55,
+  tempVec.copy(this.table.position);
+  tempVec.setY(tempVec.y + 0.5);
+
+  this.table.userData.body = createCuboidBody({
+    hx: 1.4,
+    hy: 0.15,
+    hz: 1.05,
+    position: tempVec.clone(),
   });
 
   this.cake = this.room.getObjectByName("Cake");
@@ -72,28 +75,22 @@ function setup() {
   tempVec.copy(this.cake.position);
   tempVec.setY(tempVec.y + 0.25);
 
-  this.blowSensorBody = createCylinderBody({
+  this.blowTrigger = createCylinderTrigger({
     halfHeight: 0.1,
     position: tempVec.clone(),
     radius: 0.21,
-  });
-
-  setBodySensor({
-    body: this.blowSensorBody,
-    isSensor: true,
-    name: "Blow",
   });
 
   this.scene.add(birthdayGltf.scene);
 }
 
 function update(dt) {
-  this.candleLight.intensity = Math.random() * 0.2 + 1;
+  this.candleLight.intensity = Math.random() * 0.2 + 2;
 
-  const blowSensorEvents = drainSensorEvents(this.blowSensorBody);
+  const events = drainTriggerEvents(this.blowTrigger);
 
-  if (blowSensorEvents.length > 0) {
-    console.log(blowSensorEvents);
+  if (events.length > 0) {
+    console.log("Blow", events);
   }
 
   if (this.paddle.userData.isGrabbed) {
@@ -110,7 +107,7 @@ function update(dt) {
   } else {
     setBodyType(this.paddle.userData.body, BODY_TYPE_DYNAMIC);
 
-    if (this.paddle.position.distanceTo(camera.position) > 2) {
+    if (this.paddle.position.distanceTo(camera.position) > 2.25) {
       resetDynamicBodyToPos(
         this.paddle.userData.body,
         this.paddle.userData.initPos
@@ -128,10 +125,15 @@ function update(dt) {
   }
 }
 
+function teardown() {
+  clearPhysics();
+}
+
 export default function () {
   return createSlice({
     name: "Happy birthday",
     setup,
     update,
+    teardown,
   });
 }

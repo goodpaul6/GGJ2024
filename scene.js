@@ -2,11 +2,10 @@ import * as THREE from "three";
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
 
 import { renderer } from "./renderer.js";
-import { DEBUG_MODE as PHYSICS_DEBUG_MODE, forEachBody } from "./physics.js";
 
 export const scene = new THREE.Scene();
 export const camera = new THREE.PerspectiveCamera(
-  75,
+  50,
   window.innerWidth / window.innerHeight,
   0.1,
   100
@@ -26,11 +25,11 @@ export function init() {
 
   window.addEventListener("resize", onWindowResize);
 
-  scene.background = new THREE.Color(0x79c6d4);
+  scene.background = new THREE.Color(0x131862);
 
   camera.add(listener);
 
-  const ambLight = new THREE.AmbientLight(0x606060);
+  const ambLight = new THREE.AmbientLight(0x303030);
   scene.add(ambLight);
 
   const controllerGrip1 = renderer.xr.getControllerGrip(0);
@@ -46,19 +45,4 @@ export function init() {
   );
 
   scene.add(controllerGrip2);
-}
-
-export function update(elapsed) {
-  if (!PHYSICS_DEBUG_MODE) {
-    return;
-  }
-
-  // Add body objects to scene if they haven't been added
-  forEachBody(function (body) {
-    if (!body.obj || body.obj.parent) {
-      return;
-    }
-
-    scene.add(body.obj);
-  });
 }

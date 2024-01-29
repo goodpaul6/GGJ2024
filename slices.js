@@ -10,8 +10,8 @@ export let currentSlice = null;
 
 export function init() {
   sliceMakers.push(welcomeSliceMaker);
-  sliceMakers.push(sisterSliceMaker);
   sliceMakers.push(birthdaySliceMaker);
+  sliceMakers.push(sisterSliceMaker);
 }
 
 export function update(dt) {
@@ -38,6 +38,10 @@ export function update(dt) {
   }
 
   if (currentSlice.isDone) {
+    if (currentSlice.teardown) {
+      currentSlice.teardown();
+    }
+
     // TODO(Apaar): Light switch transition
     scene.remove(currentSlice.scene);
 

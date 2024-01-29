@@ -1,11 +1,15 @@
 import * as THREE from "three";
 import RAPIER from "rapier";
 
+import { scene } from "./scene.js";
+
 let world = null;
 
 const physicsLoadedHandlers = [];
 
 const bodies = [];
+
+let triggers = [];
 
 const clock = new THREE.Clock();
 const tempVec = new THREE.Vector3();
@@ -16,7 +20,7 @@ const ONE = new THREE.Vector3(1, 1, 1);
 export const BODY_TYPE_DYNAMIC = 0;
 export const BODY_TYPE_POSN_KINEMATIC = 1;
 
-export const DEBUG_MODE = true;
+export const DEBUG_MODE = false;
 
 export function init() {
   RAPIER.init().then(function () {
@@ -140,63 +144,51 @@ export function updateObjectFromBody(mesh, body) {
 }
 
 export function resetDynamicBodyToPos(body, pos) {
-  body.setTranslation(pos.clone(), false);
-  body.setLinvel(new THREE.Vector3(), false);
-  body.setAngvel(new THREE.Vector3(), false);
+  body.setTranslation(pos.clone(), true);
+  body.setLinvel(new THREE.Vector3(), true);
+  body.setAngvel(new THREE.Vector3(), true);
 }
 
-export function numColliders(body) {
-  return body.numColliders();
-}
-
-export function setBodySensor({ body, colliderIndex = 0, name, isSensor }) {
-  if (colliderIndex < 0 || colliderIndex >= body.numColliders()) {
-    throw new Error(
-      "Invalid collider index. Make sure to attach a collider and make sure the index you provide is valid."
-    );
-  }
-
-  const collider = body.collider(colliderIndex);
-
-  const wasSensor = collider.isSensor();
-  if (wasSensor === isSensor) {
-    return;
-  }
-
-  collider.setSensor(isSensor);
-
-  if (!wasSensor && isSensor) {
-    const sensors = body.userData?.sensors ?? [];
-    sensors.push({
-      collider,
-      name,
-    });
-
-    body.userData = {
-      ...body.userData,
-      sensors,
-      sensorEvents: body.userData?.sensorEvents ?? [],
-      intersections: [],
-    };
-  } else if (wasSensor && !isSensor) {
-    body.userData.sensors.remove(
-      body.userData.sensors.find((s) => s.name === name)
-    );
-  }
-}
-
-function createSensorEvent({
-  sensorName,
-  isEnterEvent = false,
-  isExitEvent = false,
-  otherBody,
-}) {
-  return {
-    sensorName,
-    isEnterEvent,
-    isExitEvent,
-    otherBody,
+function createTrigger({ shape, position, quat = null }) {
+  const trigger = {
+    shape,
+    position: position.clone(),
+    quat: quat?.clone() ?? new THREE.Quaternion(),
+    events: [],
+    intersectingBodies: [],
+    isMarkedForRemoval: false,
+    obj: null,
   };
+
+  triggers.push(trigger);
+
+  return trigger;
+}
+
+export function removeTrigger(trigger) {
+  trigger.isMarkedForRemoval = true;
+}
+
+export function createCylinderTrigger({
+  halfHeight,
+  radius,
+  position,
+  quat = null,
+}) {
+  const shape = new RAPIER.Cylinder(halfHeight, radius);
+
+  return createTrigger({
+    shape,
+    position,
+    quat,
+  });
+}
+
+export function drainTriggerEvents(trigger) {
+  const events = trigger.events.slice();
+  trigger.events.length = 0;
+
+  return events;
 }
 
 export function setBodyType(body, type) {
@@ -220,6 +212,12 @@ const DEBUG_MATERIAL = new THREE.MeshBasicMaterial({
   opacity: 0.15,
 });
 
+const TRIGGER_MATERIAL = new THREE.MeshBasicMaterial({
+  color: 0xff0000,
+  transparent: true,
+  opacity: 0.15,
+});
+
 const DEBUG_BOX = new THREE.BoxGeometry(1, 1, 1);
 const DEBUG_CYLINDER = new THREE.CylinderGeometry(1, 1, 1);
 const DEBUG_CAPSULE = new THREE.CapsuleGeometry(1, 1);
@@ -228,17 +226,118 @@ export function forEachBody(fn) {
   bodies.forEach(fn);
 }
 
-export function drainSensorEvents(body) {
-  if (!body.userData?.sensors?.length) {
-    throw new Error(
-      "This body isn't even a sensor dawg. Use setBodySensor to set it up as one."
-    );
+export function clear() {
+  for (const body of bodies) {
+    if (body.obj?.parent) {
+      body.obj.removeFromParent();
+    }
+
+    world.removeRigidBody(body);
   }
 
-  const events = body.userData.sensorEvents.slice();
-  body.userData.sensorEvents.length = 0;
+  for (const trigger of triggers) {
+    if (trigger.obj?.parent) {
+      trigger.obj.removeFromParent();
+    }
+  }
 
-  return events;
+  bodies.length = 0;
+  triggers.length = 0;
+}
+
+function createTriggerEvent({
+  isEnterEvent = false,
+  isExitEvent = false,
+  body,
+}) {
+  if (!isEnterEvent && !isExitEvent) {
+    throw new Error("Must be either an enter or exit event!");
+  }
+
+  return {
+    isEnterEvent,
+    isExitEvent,
+    body,
+  };
+}
+
+function addSubObjectForShape({ obj, shape, translation, quat, material }) {
+  if (shape instanceof RAPIER.Cuboid) {
+    const mesh = new THREE.Mesh(DEBUG_BOX, material);
+
+    mesh.position.copy(translation);
+    mesh.quaternion.copy(quat);
+
+    mesh.scale.set(
+      shape.halfExtents.x * 2,
+      shape.halfExtents.y * 2,
+      shape.halfExtents.z * 2
+    );
+
+    obj.add(mesh);
+  } else if (shape instanceof RAPIER.Cylinder) {
+    const mesh = new THREE.Mesh(DEBUG_CYLINDER, material);
+
+    mesh.position.copy(translation);
+    mesh.quaternion.copy(quat);
+    mesh.scale.set(shape.radius, shape.halfHeight * 2, shape.radius);
+
+    obj.add(mesh);
+  } else if (shape instanceof RAPIER.Capsule) {
+    const mesh = new THREE.Mesh(DEBUG_CAPSULE, material);
+
+    mesh.position.copy(translation);
+    mesh.quaternion.copy(quat);
+    mesh.scale.set(shape.radius, shape.halfHeight * 2, shape.radius);
+
+    obj.add(mesh);
+  }
+}
+
+function addObjToBody(body) {
+  body.obj = new THREE.Object3D();
+
+  for (let i = 0; i < body.numColliders(); ++i) {
+    const collider = body.collider(i);
+
+    // This is in world space, so we use the inverse of the parent body's
+    // transform to get the collider's pos in local space
+    const colliderTranslation = collider.translation();
+
+    tempVec.copy(body.translation());
+    tempQuat.copy(body.rotation());
+
+    tempMatrix.compose(tempVec, tempQuat, ONE);
+    tempMatrix.invert();
+
+    const translation = new THREE.Vector3()
+      .copy(colliderTranslation)
+      .applyMatrix4(tempMatrix);
+
+    const shape = collider.shape;
+
+    addSubObjectForShape({
+      obj: body.obj,
+      shape,
+      translation,
+      quat: new THREE.Quaternion(),
+      material: DEBUG_MATERIAL,
+    });
+  }
+}
+
+function addObjToTrigger(trigger) {
+  trigger.obj = new THREE.Object3D();
+  trigger.obj.position.copy(trigger.position);
+  trigger.obj.quaternion.copy(trigger.quat);
+
+  addSubObjectForShape({
+    obj: trigger.obj,
+    shape: trigger.shape,
+    translation: new THREE.Vector3(),
+    quat: new THREE.Quaternion(),
+    material: TRIGGER_MATERIAL,
+  });
 }
 
 export function update() {
@@ -246,57 +345,48 @@ export function update() {
     return;
   }
 
-  for (const body of bodies) {
-    const sensors = body.userData?.sensors;
+  for (const trigger of triggers) {
+    const prevInt = trigger.intersectingBodies.slice();
+    trigger.intersectingBodies.length = 0;
 
-    if (!sensors?.length) {
-      continue;
-    }
+    world.intersectionsWithShape(
+      trigger.position,
+      trigger.quat,
+      trigger.shape,
+      (collider) => {
+        const body = collider.parent();
+        trigger.intersectingBodies.push(body);
 
-    // We have an abstraction over Rapier's low-level intersection system to
-    // surface events for bodies that enter and exit collision.
-    //
-    // Since the physics step is different from the XR step, we let the user
-    // handle the events whenever they want, and queue them up here.
-    for (const { collider, name: sensorName } of sensors) {
-      const prevIntersections = body.userData.intersections.slice();
-      body.userData.intersections.length = 0;
-
-      world.intersectionsWith(collider, (otherCollider) => {
-        const otherBody = collider.parent();
-
-        body.userData.intersections.push(otherBody);
-
-        if (prevIntersections.includes(otherBody)) {
+        if (prevInt.includes(body)) {
           return;
         }
 
-        // We just started colliding with this, so queue up an enter event
-        body.userData.sensorEvents.push(
-          createSensorEvent({
+        // This body just started colliding with us
+        trigger.events.push(
+          createTriggerEvent({
             isEnterEvent: true,
-            otherBody,
-            sensorName,
-          })
-        );
-      });
-
-      for (const prevIntersection of prevIntersections) {
-        if (body.userData.intersections.includes(prevIntersection)) {
-          continue;
-        }
-
-        // This other body stopped intersecting with us
-        body.userData.sensorEvents.push(
-          createSensorEvent({
-            isExitEvent: true,
-            otherBody: prevIntersection,
-            sensorName,
+            body,
           })
         );
       }
+    );
+
+    for (const prev of prevInt) {
+      if (trigger.intersectingBodies.includes(prev)) {
+        continue;
+      }
+
+      // This body is no longer colliding with this
+      trigger.events.push(
+        createTriggerEvent({
+          body: prev,
+          isExitEvent: true,
+        })
+      );
     }
   }
+
+  triggers = triggers.filter((t) => !t.isMarkedForRemoval);
 
   if (DEBUG_MODE) {
     for (const body of bodies) {
@@ -305,54 +395,19 @@ export function update() {
         continue;
       }
 
-      body.obj = new THREE.Object3D();
+      addObjToBody(body);
+      scene.add(body.obj);
+    }
 
-      for (let i = 0; i < body.numColliders(); ++i) {
-        const collider = body.collider(i);
-        const shape = collider.shape;
-
-        // This is in world space, so we use the inverse of the parent body's
-        // transform to get the collider's pos in local space
-        const colliderTranslation = collider.translation();
-
-        tempVec.copy(body.translation());
-        tempQuat.copy(body.rotation());
-
-        tempMatrix.compose(tempVec, tempQuat, ONE);
-        tempMatrix.invert();
-
-        const localPos = new THREE.Vector3()
-          .copy(colliderTranslation)
-          .applyMatrix4(tempMatrix);
-
-        if (shape instanceof RAPIER.Cuboid) {
-          const mesh = new THREE.Mesh(DEBUG_BOX, DEBUG_MATERIAL);
-
-          mesh.position.copy(localPos);
-
-          mesh.scale.set(
-            shape.halfExtents.x * 2,
-            shape.halfExtents.y * 2,
-            shape.halfExtents.z * 2
-          );
-
-          body.obj.add(mesh);
-        } else if (shape instanceof RAPIER.Cylinder) {
-          const mesh = new THREE.Mesh(DEBUG_CYLINDER, DEBUG_MATERIAL);
-
-          mesh.position.copy(localPos);
-          mesh.scale.set(shape.radius, shape.halfHeight * 2, shape.radius);
-
-          body.obj.add(mesh);
-        } else if (shape instanceof RAPIER.Capsule) {
-          const mesh = new THREE.Mesh(DEBUG_CAPSULE, DEBUG_MATERIAL);
-
-          mesh.position.copy(localPos);
-          mesh.scale.set(shape.radius, shape.halfHeight * 2, shape.radius);
-
-          body.obj.add(mesh);
-        }
+    for (const trigger of triggers) {
+      if (trigger.obj) {
+        trigger.obj.position.copy(trigger.position);
+        trigger.obj.quaternion.copy(trigger.quat);
+        continue;
       }
+
+      addObjToTrigger(trigger);
+      scene.add(trigger.obj);
     }
   }
 
