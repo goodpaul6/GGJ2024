@@ -1,0 +1,22 @@
+# Made using Asset Forge (2.4.0)
+
+:materials
+
+[name:bricksDark;color:RGBA(0.000, 0.000, 0.000, 1.000);scale:(1.0, 1.0);shader:Default;mapping:0;valueA:0.35;valueB:0;]
+[name:bricks;color:RGBA(1.000, 0.392, 0.306, 1.000);scale:(1.0, 1.0);shader:Default;mapping:0;valueA:0.35;valueB:0;]
+[name:skin;color:RGBA(0.981, 0.549, 0.339, 1.000);scale:(1.0, 1.0);shader:Default;mapping:0;valueA:0;valueB:0;]
+[name:woodDark;color:RGBA(0.165, 0.039, 0.000, 1.000);scale:(1.0, 1.0);shader:Default;mapping:0;valueA:0.35;valueB:0;]
+[name:wood;color:RGBA(0.840, 0.435, 0.305, 1.000);scale:(1.0, 1.0);shader:Default;mapping:0;valueA:0.35;valueB:0;]
+[name:skinDark;color:RGBA(0.165, 0.039, 0.000, 1.000);scale:(1.0, 1.0);shader:Default;mapping:0;valueA:0;valueB:0;]
+[name:foliage;color:RGBA(0.655, 0.000, 0.000, 1.000);scale:(1.0, 1.0);shader:Default;mapping:0;valueA:0.35;valueB:0;]
+[name:stone;color:RGBA(0.138, 0.099, 0.663, 1.000);scale:(1.0, 1.0);shader:Default;mapping:0;valueA:0.5;valueB:0;]
+
+:models
+
+[name:;collection:Characters;type:torso_default;position:(0.0000, 0.2000, 0.0000);rotation:(0.0000, 0.0000, 0.0000);scale:(1.0000, 1.0000, 1.0000);group:;locked:False;hidden:False;materials:wood+skin+foliage;]
+[name:;collection:Characters;type:arm_short;position:(0.0000, 0.5000, -0.0085);rotation:(0.0000, 0.0000, 0.0000);scale:(0.8000, 0.8000, 0.8400);group:;locked:False;hidden:False;materials:skin+foliage+stone;]
+[name:;collection:Characters;type:arm_short;position:(0.0000, 0.5000, -0.0085);rotation:(0.0000, 0.0000, 180.0000);scale:(0.8000, -0.8000, 0.8400);group:;locked:False;hidden:False;materials:skin+foliage+stone;]
+[name:;collection:Characters;type:hair_short;position:(0.0000, 0.5000, 0.0000);rotation:(0.0000, 0.0000, 0.0000);scale:(1.0000, 1.0000, 1.0000);group:;locked:False;hidden:False;materials:woodDark;]
+[name:;collection:Characters;type:leg_boots;position:(0.0000, 0.2000, 0.0000);rotation:(0.0000, 0.0000, 0.0000);scale:(1.0000, 1.0000, 1.0000);group:;locked:False;hidden:False;materials:wood+stone;]
+[name:;collection:Characters;type:head_default;position:(0.0000, 0.5000, 0.0000);rotation:(0.0000, 0.0000, 0.0000);scale:(1.0000, 1.0000, 1.0000);group:;locked:False;hidden:False;materials:skin+woodDark+skin+skinDark;]
+[name:;collection:Characters;type:leg_boots;position:(0.1600, 0.2000, 0.0000);rotation:(0.0000, 0.0000, 0.0000);scale:(1.0000, 1.0000, 1.0000);group:;locked:False;hidden:False;materials:wood+stone;]
