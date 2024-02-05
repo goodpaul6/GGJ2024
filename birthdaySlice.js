@@ -196,6 +196,9 @@ function update(dt) {
 }
 
 function teardown() {
+  // Put it back in its place
+  this.paddle.position.copy(this.paddle.userData.initPos);
+
   clearPhysics();
   clearParticles();
 
