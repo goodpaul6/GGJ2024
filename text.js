@@ -52,6 +52,10 @@ export function hideText() {
   mesh.visible = false;
 }
 
+export function isTextVisible() {
+  return mesh?.visible;
+}
+
 export function showText(text, timer = null) {
   meshFromText(text);
 
@@ -60,7 +64,7 @@ export function showText(text, timer = null) {
 }
 
 export function update(dt) {
-  if (mesh?.userData.timer) {
+  if (mesh?.visible && mesh?.userData.timer) {
     mesh.userData.timer -= dt;
     if (mesh.userData.timer < 0) {
       hideText();

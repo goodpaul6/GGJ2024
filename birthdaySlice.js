@@ -23,7 +23,7 @@ import {
   setEmitterPos,
   startEmitter,
 } from "./particles.js";
-import { showText } from "./text.js";
+import { isTextVisible, showText } from "./text.js";
 
 const tempVec = new THREE.Vector3();
 
@@ -51,6 +51,8 @@ function setup() {
   );
 
   for (const fire of this.candleFires) {
+    // In case it was made invisible in an earlier run through
+    fire.visible = true;
     fire.userData.initScale = fire.scale.clone();
   }
 
@@ -135,6 +137,10 @@ function update(dt) {
     this.candleLight.intensity = Math.random() * 0.3 + 0.5;
     this.candleLight.position.copy(this.paddleEmitter.pos);
     this.candleLight.position.y += 0.2;
+
+    if (!isTextVisible()) {
+      this.isDone = true;
+    }
   } else {
     this.candleLight.intensity = Math.random() * 0.3 + 2;
   }
@@ -150,7 +156,7 @@ function update(dt) {
       showText("Dad: Nice going, son! Cindy, get the water!", 5);
 
       for (const fire of this.candleFires) {
-        fire.removeFromParent();
+        fire.visible = false;
       }
 
       startEmitter(this.paddleEmitter);

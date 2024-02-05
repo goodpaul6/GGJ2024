@@ -64,9 +64,9 @@ export function removeEmitter(emitter) {
 export function clear() {
   for (const e of emitters) {
     e.iMesh.removeFromParent();
+    e.iMesh.dispose();
   }
 
-  particles.length = 0;
   emitters.length = 0;
 }
 
