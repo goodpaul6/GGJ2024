@@ -49,7 +49,9 @@ function meshFromText(text) {
 }
 
 export function hideText() {
-  mesh.visible = false;
+  if (mesh) {
+    mesh.visible = false;
+  }
 }
 
 export function isTextVisible() {
