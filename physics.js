@@ -345,6 +345,17 @@ export function update() {
     return;
   }
 
+  triggers = triggers.filter((t) => {
+    if (!t.isMarkedForRemoval) {
+      return true;
+    }
+
+    if (t.obj) {
+      t.obj.removeFromParent();
+    }
+    return false;
+  });
+
   for (const trigger of triggers) {
     const prevInt = trigger.intersectingBodies.slice();
     trigger.intersectingBodies.length = 0;
@@ -385,8 +396,6 @@ export function update() {
       );
     }
   }
-
-  triggers = triggers.filter((t) => !t.isMarkedForRemoval);
 
   if (DEBUG_MODE) {
     for (const body of bodies) {

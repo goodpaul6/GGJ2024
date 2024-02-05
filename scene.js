@@ -12,6 +12,7 @@ export const camera = new THREE.PerspectiveCamera(
 );
 export const listener = new THREE.AudioListener();
 export const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+export const ambLight = new THREE.AmbientLight(0x303030);
 
 const controllerModelFactory = new XRControllerModelFactory();
 
@@ -29,7 +30,6 @@ export function init() {
 
   camera.add(listener);
 
-  const ambLight = new THREE.AmbientLight(0x303030);
   scene.add(ambLight);
 
   const controllerGrip1 = renderer.xr.getControllerGrip(0);

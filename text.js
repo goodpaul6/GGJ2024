@@ -9,10 +9,10 @@ function meshFromText(text) {
   const ctx = canvas.getContext("2d");
 
   // Set the size of your canvas and text properties
-  canvas.width = 512;
-  canvas.height = 512;
+  canvas.width = 1024;
+  canvas.height = 1024;
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "24px Arial";
+  ctx.font = "40px Arial";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
@@ -22,39 +22,41 @@ function meshFromText(text) {
   // Create a texture from the canvas
   const texture = new THREE.CanvasTexture(canvas);
 
-  // Create a material using this texture
-  const material = new THREE.MeshBasicMaterial({
-    map: texture,
-    transparent: true,
-    side: THREE.DoubleSide,
-  });
+  if (!mesh) {
+    // Create a plane geometry for the mesh
+    const planeGeometry = new THREE.PlaneGeometry(2, 2);
 
-  // Create a plane geometry for the mesh
-  const planeGeometry = new THREE.PlaneGeometry(2, 2);
-  mesh = new THREE.Mesh(planeGeometry, material);
-  mesh.position.set(0, -0.5, -2); // set position where you want it
-  mesh.name = "Text";
+    // Create a material using this texture
+    const material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide,
+    });
 
-  mesh.material.depthTest = false;
-  mesh.material.depthWrite = false;
-  mesh.onBeforeRender = function (renderer) {
-    renderer.clearDepth();
-  };
+    mesh = new THREE.Mesh(planeGeometry, material);
+    mesh.position.set(0, -0.5, -2); // set position where you want it
+    mesh.name = "Text";
+
+    mesh.material.depthTest = false;
+    mesh.material.depthWrite = false;
+
+    camera.add(mesh);
+  } else {
+    mesh.material.map = texture;
+  }
+
+  mesh.visible = true;
 }
 
 export function hideText() {
-  camera.remove(mesh);
-  // We can use a visible property on the mesh to hide it instead,
-  // but we are always displaying different text when we make it
-  // visible again, so we just remove it from the camera instead
-  // mesh.visible = false;
+  mesh.visible = false;
 }
 
 export function showText(text, timer = null) {
   meshFromText(text);
 
   mesh.userData.timer = timer;
-  camera.add(mesh);
+  mesh.visible = true;
 }
 
 export function update(dt) {

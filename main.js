@@ -2,11 +2,9 @@
 
 // A series of vignettes that are funny-but-sad.
 
-import * as THREE from "three";
-
 import { init as initRenderer, renderer } from "./renderer.js";
 import { init as initScene, scene, camera } from "./scene.js";
-import { init as initInput, update as updateInput, tap } from "./input.js";
+import { init as initInput, update as updateInput } from "./input.js";
 import {
   getReferenceSpace,
   init as initPlayer,
@@ -22,6 +20,7 @@ import { init as initPhysics, update as updatePhysics } from "./physics.js";
 import { init as initSlices, update as updateSlices } from "./slices.js";
 import { update as updateGrabbables } from "./grabbables.js";
 import { update as updateText } from "./text.js";
+import { update as updateParticles } from "./particles.js";
 
 initPhysics();
 initRenderer();
@@ -69,6 +68,7 @@ function animate(ts) {
   updateGrabbables();
   updatePlayer(dt);
   updateText(dt);
+  updateParticles(dt);
 
   renderer.render(scene, camera);
 }
